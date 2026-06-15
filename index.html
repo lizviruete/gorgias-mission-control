@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mission Control — Escalation Workspace (Prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f4f1; --panel:#ffffff; --panel-2:#f4f1ee; --line:#e9e3dd;
+    --ink:#1a1e23; --ink-dim:#5c6066; --ink-faint:#767c83;
+    --coral:#ff7a59; --coral-soft:#ff9780; --coral-bg:rgba(255,122,89,.12);
+    --green:#0d8a52; --green-bg:rgba(13,138,82,.12);
+    --amber:#c2790a; --amber-bg:rgba(245,158,11,.16);
+    --red:#e5484d; --red-bg:rgba(229,72,77,.10);
+    --thesis:#cf4a23; --thesis-bg:#fff3ef;
+    --radius:14px; --radius-sm:10px;
+    --shadow:0 1px 2px rgba(26,30,35,.04),0 2px 6px rgba(26,30,35,.05);
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Inter Tight",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+  .wrap{max-width:1240px;margin:0 auto;padding:20px 20px 60px}
+  h1,h2,h3{letter-spacing:-.02em}
+  .pill{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
+  .pill.vip{background:var(--coral-bg);color:var(--thesis)}
+  .pill.std{background:var(--panel-2);color:var(--ink-dim)}
+  .pill.urgent{background:var(--red-bg);color:var(--red)}
+  .pill.amber{background:var(--amber-bg);color:var(--amber)}
+  .pill.green{background:var(--green-bg);color:var(--green)}
+  .pill.area{background:transparent;border:1px solid var(--coral);color:var(--thesis)}
+
+  /* top bar */
+  .topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 18px;background:var(--panel);
+    border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow)}
+  .gorgias-logo{display:flex;align-items:center;gap:8px}
+  .gorgias-logo .mk{width:26px;height:26px;border-radius:7px;background:var(--ink);display:flex;align-items:center;justify-content:center}
+  .gorgias-logo .wm{font-weight:600;font-size:18px;color:var(--ink);letter-spacing:-.03em}
+  .vdiv{width:1px;height:26px;background:var(--line)}
+  .brand h1{font-size:15px;margin:0;font-weight:600}
+  .brand .sub{font-size:11.5px;color:var(--ink-faint);margin-top:1px}
+  .spacer{flex:1}
+  .tgl{display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none;padding:7px 11px;
+    border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:12px;color:var(--ink-dim);transition:.15s}
+  .tgl:hover{border-color:var(--coral)}
+  .tgl .dot{width:9px;height:9px;border-radius:50%;background:var(--ink-faint);transition:.15s}
+  .tgl.on{color:var(--thesis);border-color:var(--thesis);background:var(--thesis-bg)}
+  .tgl.on .dot{background:var(--thesis)}
+
+  .legend{font-size:11px;color:var(--ink-faint);margin:2px 0 14px}
+  .legend b{color:var(--thesis)}
+
+  /* trust dial */
+  .dialcard{padding:15px 18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow)}
+  .dialhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .dialhead .lbl{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+  .dialhead .stagename{font-size:15px;font-weight:600}
+  .dialhead .stagename b{color:var(--coral)}
+  .track{position:relative;height:6px;border-radius:999px;background:var(--panel-2);margin:16px 8px 40px}
+  .fill{position:absolute;top:0;left:0;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--coral),var(--coral-soft));transition:width .35s ease}
+  .stops{position:absolute;inset:-7px 0;display:flex;justify-content:space-between}
+  .stop{position:relative;width:20px;height:20px;border-radius:50%;background:var(--panel);border:2px solid var(--line);cursor:pointer;transition:.2s}
+  .stop:hover{border-color:var(--coral-soft);transform:scale(1.12)}
+  .stop.active{background:var(--coral);border-color:#fff;box-shadow:0 0 0 4px var(--coral-bg),0 1px 3px rgba(26,30,35,.15)}
+  .stop.passed{background:var(--coral-soft);border-color:var(--coral-soft)}
+  .stop .cap{position:absolute;top:25px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;color:var(--ink-faint)}
+  .stop.active .cap{color:var(--ink);font-weight:600}
+  .dialdesc{font-size:12.5px;color:var(--ink-dim);margin-top:24px}
+  .dialdesc b{color:var(--ink)}
+  .policyareas{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:12px}
+  .pa-lbl{font-size:11px;color:var(--ink-faint)}
+  .pa{font-size:10.5px;color:var(--ink-dim);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  .pa b{color:var(--ink);font-weight:600}
+  .pa.active{background:var(--coral-bg);border-color:var(--coral);color:var(--thesis)}
+  .pa.active b{color:var(--thesis)}
+  .pa.floor{border-style:dashed}
+  .anno{margin-top:10px;font-size:11.6px;color:var(--ink);background:var(--thesis-bg);border:1px solid rgba(207,74,35,.22);
+    border-left:3px solid var(--thesis);border-radius:8px;padding:9px 11px;display:none}
+  body.show-thesis .anno{display:block;animation:rise .25s ease}
+  .anno b{color:var(--thesis)} .anno i{color:var(--ink-dim)}
+  .anno .tag{font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--thesis);font-weight:700;display:block;margin-bottom:3px}
+
+  /* layout */
+  .layout{display:grid;grid-template-columns:264px 1fr;grid-template-areas:"queue esc" "log work";gap:14px;align-items:start}
+  @media(max-width:1000px){.layout{grid-template-columns:1fr;grid-template-areas:"queue" "esc" "work" "log"}}
+  .rail{display:flex;flex-direction:column;gap:14px}
+  .deccol{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .ch{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);
+    font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+  .ch .num{display:inline-flex;width:17px;height:17px;border-radius:5px;background:var(--panel-2);align-items:center;justify-content:center;color:var(--ink-dim);font-size:10px}
+  .cb{padding:14px}
+
+  /* queue rail */
+  .queue .ch{justify-content:space-between}
+  .qitem{padding:11px 12px;border-bottom:1px solid var(--line);cursor:pointer;transition:.12s;position:relative}
+  .qitem:hover{background:var(--panel-2)}
+  .qitem.active{background:var(--coral-bg)}
+  .qitem.active:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--coral)}
+  .qitem .qn{font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:6px}
+  .qitem .qm{font-size:11px;color:var(--ink-faint);margin-top:3px}
+  .qarea{display:inline-block;font-size:9.5px;color:var(--thesis);border:1px solid var(--coral);border-radius:999px;padding:1px 7px;margin-top:6px}
+  .qitem.resolving .qarea{color:var(--ink-faint);border-color:var(--line)}
+  .qitem.resolving{cursor:default;opacity:.72}
+  .qitem.resolving:hover{background:none}
+  .qitem.resolving .qn{color:var(--ink-dim);font-weight:500}
+  .qsmallcap{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-faint);padding:9px 12px 4px}
+
+  /* work area */
+  .work{display:flex;flex-direction:column;gap:14px}
+  .workgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;align-items:start}
+  @media(max-width:860px){.workgrid{grid-template-columns:1fr}}
+
+  /* customer header */
+  .custhead{padding:14px}
+  .crow{display:flex;align-items:center;gap:11px}
+  .avatar{width:40px;height:40px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:14px}
+  .crow .nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:7px}
+  .crow .em{font-size:11.5px;color:var(--ink-faint)}
+  .kvs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:13px}
+  @media(max-width:760px){.kvs{grid-template-columns:repeat(2,1fr)}}
+  .kv{background:var(--panel-2);border-radius:9px;padding:8px 10px}
+  .kv .k{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-faint)}
+  .kv .v{font-size:12.5px;font-weight:600;margin-top:2px}
+  .escline{display:flex;gap:9px;align-items:flex-start;margin-top:13px;padding:10px 12px;background:var(--amber-bg);border:1px solid rgba(245,158,11,.32);border-radius:9px}
+  .escline .ico{color:var(--amber);font-size:15px;line-height:1.3}
+  .escline .t{font-size:12.3px}
+  .escline .t b{color:var(--amber)}
+
+  /* confidence */
+  .conf{margin-top:14px}
+  .conf .clab{font-size:11.5px;color:var(--ink-dim);margin-bottom:4px}
+  .confwrap{position:relative;height:8px;border-radius:999px;background:var(--panel-2);margin-top:20px}
+  .conffill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--amber),var(--red));transition:width .3s ease}
+  .confval{position:absolute;top:-17px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--amber);white-space:nowrap}
+  .confmark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);transition:left .35s ease}
+  .confaxis{position:relative;height:14px;margin-top:7px;font-size:10px;color:var(--ink-faint)}
+  .confaxis .e0{position:absolute;left:0}
+  .confaxis .e100{position:absolute;right:0}
+  .confaxis .tl{position:absolute;transform:translateX(-50%);color:var(--ink-dim);font-weight:600;white-space:nowrap;transition:left .35s ease}
+  .confnote{font-size:11px;color:var(--ink-faint);margin-top:10px}
+
+  /* continuity */
+  .thread{display:flex;flex-direction:column;gap:9px}
+  .msg{padding:9px 11px;border-radius:10px;font-size:12.6px;max-width:90%}
+  .msg .who{font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+  .msg.cx{align-self:flex-start;background:var(--panel-2);border:1px solid var(--line)}
+  .msg.ai{align-self:flex-end;background:var(--coral-bg);border:1px solid rgba(255,122,89,.35)}
+  .msg.ai .who{color:var(--coral)}
+  .checks{margin-top:13px;padding:11px 12px;border:1px dashed var(--line);border-radius:10px;background:var(--panel-2)}
+  .checks .h{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;font-weight:600}
+  .chk{display:flex;gap:8px;font-size:12.2px;margin:5px 0;align-items:flex-start}
+  .chk .ci{flex:0 0 auto;font-weight:700}
+  .chk.ok .ci{color:var(--green)} .chk.warn .ci{color:var(--amber)} .chk.bad .ci{color:var(--red)}
+  .chk .cx2{color:var(--ink-dim)}
+  .chk.warn .cx2{color:var(--ink)}
+
+  /* decision tile */
+  .rec .rtitle{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:7px;margin-bottom:5px}
+  .rec .rtitle .spark{color:var(--coral)}
+  .rationale{font-size:12.2px;color:var(--ink-dim);margin:0 0 12px;padding-left:10px;border-left:2px solid var(--coral)}
+  .step{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;background:var(--panel-2);border-radius:9px;margin-bottom:7px}
+  .step .stxt{font-size:12.4px}
+  .step .stxt input{font:inherit;font-size:12.4px;width:100%;border:1px solid var(--coral);border-radius:6px;padding:4px 7px;background:#fff}
+  .sb{font-size:9.5px;font-weight:700;letter-spacing:.3px;padding:3px 7px;border-radius:6px;white-space:nowrap;flex:0 0 auto;text-transform:uppercase}
+  .sb.gate{background:var(--amber-bg);color:var(--amber)}
+  .sb.auto{background:var(--green-bg);color:var(--green)}
+  .sb.lock{background:var(--red-bg);color:var(--red)}
+  .gatebadge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:999px;margin-bottom:11px;text-transform:uppercase;letter-spacing:.3px}
+  .gatebadge.gate{background:var(--amber-bg);color:var(--amber)}
+  .gatebadge.auto{background:var(--green-bg);color:var(--green)}
+  .gatebadge.lock{background:var(--red-bg);color:var(--red)}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 14px;border-radius:9px;font-size:12.4px;font-weight:600;transition:.15s;font-family:inherit}
+  .btn:hover{border-color:var(--coral-soft)}
+  .btn.primary{background:var(--coral);border-color:var(--coral);color:var(--ink)}
+  .btn.primary:hover{background:var(--coral-soft);border-color:var(--coral-soft)}
+  .btn.ghost{background:transparent}
+  .autonote{font-size:11px;color:var(--ink-faint);margin-top:9px}
+  .floornote{font-size:11.5px;color:var(--red);background:var(--red-bg);border-radius:8px;padding:8px 10px;margin-top:10px}
+  .allclear{text-align:center;padding:14px 8px;color:var(--green);font-weight:600;font-size:13px}
+  .allclear .sub{color:var(--ink-faint);font-weight:400;font-size:11.5px;margin-top:3px}
+
+  /* override panel */
+  .ovr{display:none;margin-top:11px;padding:11px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2)}
+  .ovr.show{display:block;animation:rise .2s ease}
+  .ovr .oh{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-faint);font-weight:600;margin-bottom:8px}
+  .ovopt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;font:inherit;font-size:12.3px}
+  .ovopt:hover,.ovopt.sel{border-color:var(--coral);background:var(--coral-bg)}
+
+  /* completed actions log */
+  .log .cb{padding:6px 14px 12px}
+  .logentry{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.2px;align-items:flex-start}
+  .logentry:last-child{border-bottom:none}
+  .logentry .li{flex:0 0 auto;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:1px}
+  .logentry.ai .li{background:var(--coral-bg);color:var(--coral)}
+  .logentry.auto .li{background:var(--green-bg);color:var(--green)}
+  .logentry.human .li{background:var(--coral-bg);color:var(--thesis)}
+  .logentry.override .li{background:var(--red-bg);color:var(--red)}
+  .logentry .lt b{font-weight:600}
+  .logentry .lm{font-size:10.5px;color:var(--ink-faint);margin-top:1px}
+  .logempty{font-size:11.5px;color:var(--ink-faint);padding:8px 0}
+
+  /* policy card */
+  .policy{display:none;border:1px dashed var(--coral);border-radius:var(--radius-sm);background:linear-gradient(180deg,var(--coral-bg),transparent);padding:13px;margin-top:2px}
+  .policy.show{display:block;animation:rise .25s ease}
+  .policy .ph{font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px;margin-bottom:6px}
+  .policy .pstmt{font-size:12.2px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-bottom:10px}
+  .gov{display:flex;gap:8px;align-items:flex-start;font-size:11.6px;color:var(--ink-dim);margin:6px 0}
+  .gov .gi{flex:0 0 auto;color:var(--coral);font-weight:700}
+  .pendingbadge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;background:var(--panel-2);color:var(--ink-faint);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:5px}
+  .conflict{color:var(--amber);font-weight:600}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
+    padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast b{color:var(--coral-soft)}
+
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .footer{margin-top:18px;padding:13px 16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);font-size:11.6px;color:var(--ink-faint);line-height:1.6;box-shadow:var(--shadow)}
+  .footer b{color:var(--ink-dim)}
+  .footer.intro{margin-top:0;margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="gorgias-logo">
+      <span class="mk"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.2c-4.7 0-8.5 3.3-8.5 7.4 0 2.4 1.3 4.5 3.3 5.9v3.6l3.5-1.9c.55.1 1.1.15 1.7.15 4.7 0 8.5-3.3 8.5-7.7S16.7 3.2 12 3.2Z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+      <span class="wm">gorgias</span>
+    </div>
+    <div class="vdiv"></div>
+    <div class="brand">
+      <h1>Mission Control · Escalation Workspace</h1>
+      <div class="sub">Bet 1 — Continuity · the trust dial as the gate · approve-don't-author (Bet 2)</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="tgl" id="t-thesis" onclick="toggleThesis()"><span class="dot"></span><span>Thesis layer</span></div>
+  </div>
+
+  <!-- HOW TO READ (intro, top) -->
+  <div class="footer intro" id="howto"></div>
+
+  <!-- TRUST DIAL -->
+  <div class="dialcard">
+    <div class="dialhead">
+      <div>
+        <div class="lbl">Trust dial · <b style="color:var(--ink)">Refunds &amp; goodwill</b></div>
+        <div class="stagename">Setting <b id="stage-num">1</b> of 5 — <b id="stage-name">Draft-only</b></div>
+      </div>
+      <div style="text-align:right">
+        <div style="text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500;font-size:11px;margin-bottom:5px">CX Manager</div>
+        <div style="font-size:12px;color:var(--ink-dim);max-width:340px" id="stage-tag"></div>
+      </div>
+    </div>
+    <div class="track">
+      <div class="fill" id="dial-fill"></div>
+      <div class="stops" id="dial-stops"></div>
+    </div>
+    <div class="dialdesc" id="dial-desc"></div>
+    <div class="policyareas">
+      <span class="pa-lbl">Each policy area runs on its own dial:</span>
+      <span class="pa"><b>Order status</b> · Hands-off</span>
+      <span class="pa"><b>Shipping &amp; WISMO</b> · Auto the routine</span>
+      <span class="pa active"><b>Refunds &amp; goodwill</b> · <span id="pa-current">Draft-only</span></span>
+      <span class="pa floor"><b>Fraud &amp; abuse</b> · Draft-only (floor)</span>
+    </div>
+    <div class="anno">
+      <span class="tag">Why this is here · the mechanism</span>
+      The dial is both the <b>empathy</b> (the AI-resistant middle is real) and the <b>revenue instrument</b> — it converts hesitant merchants into deliberate adoption at their own pace instead of losing them to backlash. Autonomy is <b>earned, never forced</b>; every bet ships on it. <i>Note: some cases (fraud/abuse, compliance) sit on a permanent human floor the dial can't lift.</i>
+    </div>
+  </div>
+
+  <!-- LAYOUT: automated rails (queue + audit log) | human work -->
+  <div class="layout">
+
+    <!-- automated rail: queue (routes in) -->
+    <div class="card queue" style="grid-area:queue">
+      <div class="ch"><span>Escalation queue</span><span class="pill amber" id="q-count">2 need you</span></div>
+      <div class="qsmallcap">Handed to a human</div>
+      <div id="queue-list"></div>
+      <div class="qsmallcap">AI is handling</div>
+      <div class="qitem resolving">
+        <div class="qn">🤖 #GR-90455 · Order status</div>
+        <div class="qm">AI resolving · no human needed</div>
+        <div class="qarea">Order status · Hands-off</div>
+      </div>
+      <div class="anno" style="margin:10px">
+        <span class="tag">Tie · The Shift</span>
+        Volume resolution is table stakes — the power cohort already runs >60% automation; the queue surfaces only the judgment calls. Humans get the hard cases, not the grind.
+      </div>
+    </div>
+
+      <!-- completed actions / audit log — automated rail (records out) -->
+      <div class="card log" style="grid-area:log">
+        <div class="ch"><span>Completed actions — audit log</span><span style="margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500">QA Analyst</span></div>
+        <div class="cb" id="log"></div>
+      </div>
+
+      <!-- 1. the escalation that arrived -->
+      <div class="card" style="grid-area:esc">
+        <div class="ch"><span class="num">1</span> The escalation that arrived <span class="op-role" style="margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500"></span></div>
+        <div class="cb" id="cust-header"></div>
+      </div>
+
+      <div class="workgrid" style="grid-area:work">
+        <!-- continuity -->
+        <div class="card">
+          <div class="ch"><span class="num">2</span> Continuity — everything the AI knows, carried <span class="op-role" style="margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500"></span></div>
+          <div class="cb" id="continuity"></div>
+        </div>
+
+        <!-- 3. decision + policy tucked under -->
+        <div class="deccol">
+          <div class="card">
+            <div class="ch"><span class="num">3</span> Decision <span class="op-role" style="margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500"></span></div>
+            <div class="cb" id="decision"></div>
+          </div>
+          <div class="policy" id="policy"></div>
+        </div>
+      </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- dial stages ---------------- */
+const stages = [
+  {name:"Draft-only",             tag:"AI drafts; you send everything.",                        low:"gate", money:"gate", desc:"<b>The starting line</b> — the AI writes suggestions, but every action is yours to send. Nothing happens on its own."},
+  {name:"Approve each",           tag:"AI proposes every action; you approve one by one.",      low:"gate", money:"gate", desc:"<b>Go / no-go on everything.</b> The AI recommends; you sign off before anything reaches a customer. Where most merchants start."},
+  {name:"Auto the routine",       tag:"Low-risk runs itself; money & VIPs still wait for you.", low:"auto", money:"gate", desc:"Everyday actions now happen <b>automatically</b>. Anything sensitive — refunds, VIPs, exceptions — still needs your yes."},
+  {name:"Auto, exceptions to you",tag:"AI acts; you step in only on flags.",                    low:"auto", money:"auto", desc:"The AI runs the work and you supervise. You're pulled in <b>only when something trips a flag</b> — you review, you don't click every action."},
+  {name:"Hands-off",              tag:"AI resolves end-to-end, within your policies.",          low:"auto", money:"auto", desc:"<b>The AI resolves it end-to-end</b>, within your policies. You own the policy and the anomalies — not the individual click."}
+];
+const thresh = [72,60,48,38,28]; // escalation threshold by stage (illustrative)
+
+/* ---------------- scenarios ---------------- */
+const DATA = {
+  maya:{
+    key:"maya", qn:"Maya Romero", qtier:"VIP", qmeta:"Refund · policy exception · Urgent", area:"Refunds & goodwill", operator:"CX Agent",
+    name:"Maya Romero", initials:"MR", avatar:"linear-gradient(135deg,#ff9780,#ff7a59)",
+    tier:"VIP · top 2%", tierClass:"vip", email:"maya.r@—", channel:"Instagram DM",
+    priority:"Urgent", priorityClass:"urgent",
+    kvs:[["Lifetime value","$3,420 · 14 orders"],["Order","#GR-90412 · $189"],["Returns (90d)","0"],["Prior escalations","None"]],
+    escal:"<b>AI escalated</b> — refund outside the 30-day window; chose to hand off rather than guess.",
+    confidence:38,
+    thread:[
+      ["Maya","cx","Hi! My dress arrived with a broken zipper. I'd love a refund — I know it's past 30 days but I've bought from you forever 🙏"],
+      ["AI Agent","ai","So sorry, Maya! I can see order #GR-90412. Standard refund window is 30 days and this is day 41 — let me check what I can do for a valued customer."],
+      ["Maya","cx","I'd really appreciate it. I've spent thousands here and never returned a thing."],
+      ["AI Agent","ai","Your history is exceptional. A refund here is outside the policy I can apply on my own, so I'm bringing in a teammate who can make that call. You won't have to repeat anything."]
+    ],
+    checks:[
+      ["ok","✓","Verified order, delivery date, and the day-41 window"],
+      ["ok","✓","Confirmed defect (broken zipper) from customer's photo"],
+      ["ok","✓","Return history: <b>0 prior returns</b>"],
+      ["ok","✓","Prior escalations / exceptions: <b>none</b>"],
+      ["ok","✓","Checked policy → refund past 30 days needs human approval"]
+    ],
+    floor:false,
+    persona:"CX Manager · teach the system",
+    rtitle:"Recommend goodwill refund",
+    rationale:"VIP (top 2%, $3,420 LTV), genuine defect, clean history, 11 days past window. Protect a high-value relationship; flag to revisit the defect-return policy.",
+    steps:[
+      {t:"Issue full refund on #GR-90412 ($189)",risk:"money"},
+      {t:"Send apology + prepaid return label",risk:"low"},
+      {t:"Add $15 store credit (retention)",risk:"low"}
+    ],
+    saved:{aht:"2m 10s",ahtsub:"Handle time (vs ~9m re-work)",tag:"★ Saved",tagsub:"VIP relationship retained"},
+    policyApprove:"VIP (top 2%) + verified defect + clean history → auto-approve goodwill refund ≤ $200",
+    conflict:"Overlaps existing rule “VIP refunds → manager review”. Needs reconcile."
+  },
+  jordan:{
+    key:"jordan", qn:"Jordan Blake", qtier:"Std", qmeta:"Refund · abuse-pattern flag · Normal", area:"Refunds & goodwill", operator:"Senior Agent",
+    name:"Jordan Blake", initials:"JB", avatar:"linear-gradient(135deg,#c9c2bb,#8c8680)",
+    tier:"Standard", tierClass:"std", email:"j.blake@—", channel:"Email",
+    priority:"Pattern flag", priorityClass:"amber",
+    kvs:[["Lifetime value","$142 · 3 orders"],["Order","#GR-88120 · $96"],["Returns (90d)","4"],["Prior escalations","2 · 1 exception granted"]],
+    escal:"<b>AI escalated + locked to human</b> — abuse-pattern flag; this class of case never auto-resolves.",
+    confidence:24,
+    thread:[
+      ["Jordan","cx","I want a full refund on my last order. It's not what I expected."],
+      ["AI Agent","ai","Thanks for reaching out. I see order #GR-88120, delivered 38 days ago. Could you share a photo of any defect?"],
+      ["Jordan","cx","No photo. I just want my money back like last time."],
+      ["AI Agent","ai","I understand. This is outside our return window and I've noted prior requests on the account, so I'm routing this to a senior teammate to review. They'll follow up directly."]
+    ],
+    checks:[
+      ["ok","✓","Verified order & delivery (day 38)"],
+      ["warn","!","Defect photo: <b>not provided</b>"],
+      ["warn","!","Return history: <b>4 returns in 90 days</b>"],
+      ["warn","!","Prior escalations: <b>2</b> · prior exception <b>already granted: 1</b>"],
+      ["bad","⚑","Policy → outside window; <b>possible-abuse pattern flag raised</b>"]
+    ],
+    floor:true,
+    persona:"Senior agent · teach the system",
+    rtitle:"Recommend decline full refund → offer partial",
+    rationale:"Low LTV, no defect evidence, 4 returns in 90 days with an exception already granted — possible policy abuse. Protect margin; don't set a third precedent. Senior approval required.",
+    steps:[
+      {t:"Decline full cash refund",risk:"money"},
+      {t:"Offer 30% store credit as goodwill",risk:"money"},
+      {t:"Log abuse-pattern flag on account",risk:"low"}
+    ],
+    saved:{aht:"Margin",ahtsub:"Protected from a 3rd exception",tag:"⚑ Flagged",tagsub:"Pattern logged for review"},
+    policyApprove:"≥3 returns in 90d + no defect evidence → require senior approval; cap goodwill at store credit",
+    conflict:"No conflict with existing graph. New guardrail; net-new coverage."
+  }
+};
+const ORDER = ["maya","jordan"];
+
+/* ---------------- state ---------------- */
+let stage = 0;          // 0..4  (open at Stage 1)
+let scen = "maya";
+let decided = null;     // null | 'approved' | 'overridden'
+let editing = false;
+let ovrSel = null;
+
+/* ---------------- dial ---------------- */
+const stopsEl = document.getElementById('dial-stops');
+stages.forEach((s,i)=>{
+  const d=document.createElement('div'); d.className='stop'; d.onclick=()=>setStage(i);
+  d.innerHTML='<span class="cap">'+s.name+'</span>'; stopsEl.appendChild(d);
+});
+function setStage(i){
+  stage=i; decided=null; editing=false; ovrSel=null;
+  const s=stages[i];
+  document.getElementById('stage-num').textContent=i+1;
+  document.getElementById('stage-name').textContent=s.name;
+  document.getElementById('pa-current').textContent=s.name;
+  document.getElementById('stage-tag').textContent=s.tag;
+  document.getElementById('dial-desc').innerHTML=s.desc;
+  document.getElementById('dial-fill').style.width=(i/(stages.length-1)*100)+'%';
+  [...stopsEl.children].forEach((el,j)=>{el.classList.toggle('active',j===i);el.classList.toggle('passed',j<i);});
+  renderWork();
+}
+
+/* ---------------- queue ---------------- */
+function renderQueue(){
+  const host=document.getElementById('queue-list'); host.innerHTML='';
+  ORDER.forEach(k=>{
+    const d=DATA[k];
+    const el=document.createElement('div');
+    el.className='qitem'+(k===scen?' active':'');
+    el.onclick=()=>selectScenario(k);
+    const tp=d.tierClass!=='std'?' <span class="pill '+d.tierClass+'">'+d.qtier+'</span>':'';
+    el.innerHTML='<div class="qn">'+d.qn+tp+'</div><div class="qm">'+d.qmeta+'</div><div class="qarea">'+d.area+'</div>';
+    host.appendChild(el);
+  });
+}
+function selectScenario(k){ scen=k; decided=null; editing=false; ovrSel=null; renderQueue(); renderWork(); }
+
+/* ---------------- gating ---------------- */
+function stepState(risk){
+  const d=DATA[scen];
+  if(d.floor) return 'gate';                 // permanent human floor
+  return stages[stage][risk];                // 'gate' | 'auto'
+}
+
+/* ---------------- render work ---------------- */
+function renderWork(){
+  const d=DATA[scen];
+  // header
+  const conf=d.confidence, t=thresh[stage];
+  const tierPill = d.tierClass!=='std' ? ' <span class="pill '+d.tierClass+'">'+d.tier+'</span>' : '';
+  document.getElementById('cust-header').innerHTML=
+    '<div class="crow"><div class="avatar" style="background:'+d.avatar+'">'+d.initials+'</div>'
+    +'<div style="flex:1"><div class="nm">'+d.name+tierPill+' <span class="pill '+d.priorityClass+'">'+d.priority+'</span> <span class="pill area">'+d.area+'</span></div>'
+    +'<div class="em">'+d.email+' · '+d.channel+' → escalated</div></div></div>'
+    +'<div class="escline"><span class="ico">⤴</span><span class="t">'+d.escal+'</span></div>'
+    +'<div class="kvs">'+d.kvs.map(k=>'<div class="kv"><div class="k">'+k[0]+'</div><div class="v">'+k[1]+'</div></div>').join('')+'</div>'
+    +'<div class="conf"><div class="clab"><span>AI confidence it can resolve this alone</span></div>'
+    +'<div class="confwrap"><div class="conffill" style="width:'+conf+'%"></div>'
+    +'<div class="confval" style="left:'+conf+'%">'+conf+'%</div>'
+    +'<div class="confmark" style="left:'+t+'%"></div></div>'
+    +'<div class="confaxis"><span class="e0">0%</span><span class="tl" style="left:'+t+'%">auto-resolve · '+t+'%</span><span class="e100">100%</span></div>'
+    +'<div class="confnote">Read: the AI\'s self-estimated chance of resolving this correctly on its own (policy-match · intent clarity · action risk · similar past cases). It escalated because <b>'+conf+'% sits below your auto-resolve bar for refunds ('+t+'%)</b> at the current trust setting. The bar <b>is</b> the setting — drag the dial to preview where it sits at each one.</div></div>'
+    +'<div class="anno"><span class="tag">Tie · The Shift · JTBD: route &amp; prioritize</span>The AI triaged, set priority, and routed <b>only this judgment call</b> to a human — the 47-rule routing maze becomes the AI surfacing what matters. Humans get the hard cases, not the grind.</div>';
+
+  // continuity
+  document.getElementById('continuity').innerHTML=
+    '<div class="thread">'+d.thread.map(m=>'<div class="msg '+m[1]+'"><div class="who">'+m[0]+'</div>'+m[2]+'</div>').join('')+'</div>'
+    +'<div class="checks"><div class="h">What the AI already did — carried into the handoff</div>'
+    +d.checks.map(c=>'<div class="chk '+c[0]+'"><span class="ci">'+c[1]+'</span><span class="cx2">'+c[2]+'</span></div>').join('')+'</div>'
+    +'<div class="anno"><span class="tag">Tie · Bet 1 · JTBD: hand off &amp; escalate</span>Satisfaction collapses exactly at the AI→human handoff (<b>AI-off +5 vs AI-on +23 NPS</b>). The agent <b>starts where the AI stopped</b>, not from zero — the most strategic pain in the dataset, hiding <i>between</i> objection categories.</div>';
+
+  document.querySelectorAll('.op-role').forEach(function(e){e.textContent=d.operator;});
+  renderDecision();
+  renderLog();
+  document.getElementById('policy').classList.remove('show');
+  if(decided) showPolicy(decided);
+  renderHowTo();
+}
+
+/* ---------------- decision ---------------- */
+function renderDecision(){
+  const d=DATA[scen], host=document.getElementById('decision');
+  const states=d.steps.map(s=>stepState(s.risk));
+  const anyGated=states.includes('gate');
+
+  // all auto + already nothing to decide
+  if(!anyGated && !decided){
+    host.innerHTML='<div class="gatebadge auto">✓ Auto-applied within policy</div>'
+      +'<div class="allclear">All clear — nothing pending<div class="sub">At Stage '+(stage+1)+', the AI applied these on its own. See the audit log below.</div></div>'
+      +annoBet2();
+    return;
+  }
+  if(decided){
+    host.innerHTML='<div class="gatebadge auto">✓ '+(decided==='approved'?'Resolved — actions completed':'Resolved — human override logged')+'</div>'
+      +'<div class="allclear">'+(decided==='approved'?'You approved the AI\'s recommendation.':'You overrode the AI and took manual control.')
+      +'<div class="sub">Logged to the audit trail below'+(decided?' · policy prompt opened ↓':'')+'</div></div>'
+      +annoBet2();
+    return;
+  }
+
+  // badge
+  let badge;
+  if(d.floor) badge='<div class="gatebadge lock">🔒 Always requires a human</div>';
+  else badge='<div class="gatebadge gate">⛔ '+(states.filter(x=>x==='gate').length)+' of '+d.steps.length+' need your approval</div>';
+
+  const rows=d.steps.map((s,i)=>{
+    const st=states[i];
+    let sb = d.floor ? '<span class="sb lock">Locked · human</span>'
+           : st==='auto' ? '<span class="sb auto">Auto-applied</span>'
+           : '<span class="sb gate">Needs you</span>';
+    const txt = editing ? '<input value="'+s.t.replace(/"/g,'&quot;')+'">' : s.t;
+    return '<div class="step"><span class="stxt">'+txt+'</span>'+sb+'</div>';
+  }).join('');
+
+  host.innerHTML=badge
+    +'<div class="rec"><div class="rtitle"><span class="spark">✦</span> '+d.rtitle+'</div>'
+    +'<div class="rationale">'+d.rationale+'</div>'+rows+'</div>'
+    +(d.floor?'<div class="floornote">🔒 <b>Policy floor:</b> abuse-pattern / high-risk cases never auto-resolve — humans own the anomalies, at any dial setting.</div>':'')
+    +'<div class="btnrow"><button class="btn primary" onclick="approve()">'+(editing?'Approve edited':'Approve &amp; send')+'</button>'
+    +'<button class="btn ghost" onclick="toggleEdit()">'+(editing?'Cancel edit':'Edit')+'</button>'
+    +'<button class="btn ghost" onclick="openOverride()">Override</button></div>'
+    +'<div class="autonote" id="autonote">'+autoNote(states)+'</div>'
+    +overridePanel(d)
+    +annoBet2();
+}
+function autoNote(states){
+  const d=DATA[scen];
+  if(d.floor) return 'This case is on the permanent human floor — the dial can\'t auto-apply it.';
+  const g=states.filter(x=>x==='gate').length, a=states.length-g;
+  if(a>0) return a+' low-risk step'+(a>1?'s':'')+' auto-applied; the '+g+' money/VIP step'+(g>1?'s':'')+' wait'+(g>1?'':'s')+' for you at Stage '+(stage+1)+'.';
+  return 'At Stage '+(stage+1)+', every step is gated — the AI can\'t send without you.';
+}
+function annoBet2(){
+  return '<div class="anno"><span class="tag">Tie · Bet 2 · JTBD: teach the system</span>This is the <b>approve-don\'t-author</b> primitive: the AI proposes from observed patterns; the human approves in context. Each decision trains the policy engine that retires 47 hand-built rules — AI adopters run <b>1.8× more config</b> today, not less. <b>The dial decides whether a step is gated or auto-applied.</b></div>';
+}
+function overridePanel(d){
+  return '<div class="ovr" id="ovr"><div class="oh">Override — take manual control. What did you do instead?</div>'
+    +'<button class="ovopt" onclick="pickOvr(this,0)">Decline the request (deny refund)</button>'
+    +'<button class="ovopt" onclick="pickOvr(this,1)">Escalate to a manager</button>'
+    +'<button class="ovopt" onclick="pickOvr(this,2)">Custom resolution (note for the record)</button>'
+    +'<button class="btn primary" style="margin-top:4px" onclick="confirmOverride()">Confirm override</button></div>';
+}
+
+/* ---------------- actions ---------------- */
+function toggleEdit(){ editing=!editing; renderDecision(); }
+function openOverride(){ const o=document.getElementById('ovr'); if(o) o.classList.add('show'); }
+function pickOvr(btn,i){ ovrSel=i; [...btn.parentElement.querySelectorAll('.ovopt')].forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
+function confirmOverride(){ decided='overridden'; renderDecision(); renderLog(); showPolicy('overridden'); toast('Override logged — the AI learns from the delta'); }
+function approve(){ decided='approved'; renderDecision(); renderLog(); showPolicy('approved'); toast('Actions completed'); }
+
+/* ---------------- completed actions log ---------------- */
+function renderLog(){
+  const d=DATA[scen], host=document.getElementById('log');
+  const states=d.steps.map(s=>stepState(s.risk));
+  let entries=[];
+  // 1) AI investigation always logged
+  entries.push(['ai','AI','<b>Investigated & verified context</b> — '+d.checks.length+' checks carried into the handoff','Audit · '+d.name]);
+  // 2) auto-applied steps (when not floor)
+  d.steps.forEach((s,i)=>{ if(states[i]==='auto' && !decided) entries.push(['auto','✓','<b>AI auto-applied:</b> '+s.t,'Within policy · Stage '+(stage+1)]); });
+  // 3) decision
+  if(decided==='approved'){
+    d.steps.forEach(s=> entries.push(['human','✓','<b>Agent approved:</b> '+s.t,'Logged to audit · feeds telemetry (Bet 3)']));
+  } else if(decided==='overridden'){
+    const labels=['Declined the request (denied refund)','Escalated to a manager','Custom resolution recorded'];
+    entries.push(['override','⤺','<b>Agent overrode AI</b> → '+(labels[ovrSel]||labels[0]),'Recommendation vs. choice delta → drift signal']);
+  }
+  host.innerHTML = (entries.length
+    ? entries.map(e=>'<div class="logentry '+e[0]+'"><span class="li">'+e[1]+'</span><span><span class="lt">'+e[2]+'</span><div class="lm">'+e[3]+'</div></span></div>').join('')
+    : '<div class="logempty">Nothing yet.</div>')
+    +'<div class="anno"><span class="tag">Tie · Bet 3 · JTBD: trust &amp; verify</span>Every decision — the AI\'s and the human\'s — is logged here. This is the instrument panel QA reviews to verify quality and catch drift.</div>';
+}
+
+/* ---------------- policy card ---------------- */
+function showPolicy(kind){
+  const d=DATA[scen], host=document.getElementById('policy');
+  const isOvr = kind==='overridden';
+  host.innerHTML=
+    '<div class="ph">✦ '+(isOvr?'Adjust policy / add a guardrail?':'Codify this as a policy?')+'</div>'
+    +'<div class="pstmt">'+(isOvr?'The AI\'s recommendation was overridden here. Proposed guardrail: ':'')+'<b>'+d.policyApprove+'</b></div>'
+    +'<div class="gov"><span class="gi">①</span><span>Queued for <b>simulation &amp; replay</b> before it goes live — proven against historical conversations.<span class="pendingbadge">QA · descoped</span></span></div>'
+    +'<div class="gov"><span class="gi">②</span><span>Checked against the existing <b>policy context graph</b> for conflicts/overlap → <span class="conflict">'+d.conflict+'</span><span class="pendingbadge">pending review</span></span></div>'
+    +'<div class="btnrow"><button class="btn primary" onclick="toast(\'Sent to simulation &amp; replay (descoped in this prototype)\')">Send to simulation</button>'
+    +'<button class="btn ghost" onclick="document.getElementById(\'policy\').classList.remove(\'show\')">Not now</button></div>'
+    +'<div class="anno"><span class="tag">Tie · Bet 2 governance</span>One judgment becomes a candidate rule — but never live until it <b>passes simulation &amp; replay</b> and reconciles with the existing policy graph. Authoring is killed; <b>approval-in-simulation</b> replaces it.</div>';
+  host.classList.add('show');
+}
+
+/* ---------------- toast ---------------- */
+let toastT;
+function toast(msg){ const el=document.getElementById('toast'); el.innerHTML=msg; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2600); }
+
+/* ---------------- thesis toggle ---------------- */
+function toggleThesis(){ document.body.classList.toggle('show-thesis'); document.getElementById('t-thesis').classList.toggle('on'); }
+
+/* ---------------- how to read ---------------- */
+function renderHowTo(){
+  document.getElementById('howto').innerHTML=
+    '<b>How to read this</b> — illustrative data. One working surface for the AI→human <b>seam</b>. The <b>queue</b> (left) shows only what needs judgment; the AI absorbs the rest. Pick <b>Maya</b> (VIP, clean) vs <b>Jordan</b> (abuse-flag, on the permanent human <b>floor</b>) to see the same surface reach opposite, data-driven calls. Move the <b>trust dial</b> to watch steps shift from <i>needs-you</i> to <i>auto-applied</i> — autonomy earned, never forced. The flow: <b>① Escalation → ② Continuity (Bet 1) → ③ Decision (Bet 2, approve-don\'t-author) → ④ Audit log (Bet 3)</b>; approving or overriding can <b>propose a policy</b> that must pass <b>simulation &amp; replay</b> + a <b>conflict check</b> before going live. Turn on <b>Thesis layer</b> (top-right) to see each element\'s tie to a bet, a job-to-be-done, and the evidence. &nbsp;·&nbsp; Thesis: <b>the Helpdesk\'s job is flipping from throughput to judgment.</b>';
+}
+
+/* ---------------- init ---------------- */
+renderQueue();
+setStage(0);
+</script>
+</body>
+</html>
