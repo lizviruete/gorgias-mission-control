@@ -508,6 +508,7 @@ function renderWork(){
   const d=DATA[scen];
   // header
   const conf=d.confidence, t=thresh[stage];
+  const mt = t>74 ? 'translateX(-100%)' : (t<26 ? 'translateX(0)' : 'translateX(-50%)'); // keep bar label off the edges
   const handled=aiHandled(d);
   const route = d.floor ? 'escalated' : (handled ? 'AI-resolved' : 'escalated');
   const escCls = handled ? ' ok' : '';
@@ -528,11 +529,11 @@ function renderWork(){
     +'<div class="em">'+d.email+' · '+d.channel+' → '+route+'</div></div></div>'
     +'<div class="escline'+escCls+'"><span class="ico">'+escIco+'</span><span class="t">'+escText+'</span></div>'
     +'<div class="kvs">'+d.kvs.map(k=>'<div class="kv"><div class="k">'+k[0]+'</div><div class="v">'+k[1]+'</div></div>').join('')+'</div>'
-    +'<div class="conf"><div class="clab"><span>AI confidence · this case</span><span style="color:var(--ink-faint);font-weight:500">Auto-resolve bar · this setting</span></div>'
+    +'<div class="conf"><div class="clab"><span>AI confidence · this case</span></div>'
     +'<div class="confwrap"><div class="conffill" style="width:'+conf+'%"></div>'
     +'<div class="confval" style="left:'+conf+'%">'+conf+'%</div>'
     +'<div class="confmark" style="left:'+t+'%"></div></div>'
-    +'<div class="confaxis"><span class="e0">0%</span><span class="tl" style="left:'+t+'%">bar · '+t+'%</span><span class="e100">100%</span></div>'
+    +'<div class="confaxis"><span class="e0">0%</span><span class="tl" style="left:'+t+'%;transform:'+mt+'">auto-resolve bar · '+t+'%</span><span class="e100">100%</span></div>'
     +'<div class="confnote">'+note+'</div></div>'
     +'<div class="anno"><span class="tag">Tie · The Shift · JTBD: route &amp; prioritize</span>The AI triages and prioritizes every conversation, routing the judgment calls to a human and resolving the rest — the 47-rule routing maze becomes the AI surfacing what matters.</div>';
 
@@ -541,7 +542,7 @@ function renderWork(){
     '<div class="thread">'+d.thread.map(m=>'<div class="msg '+m[1]+'"><div class="who">'+m[0]+'</div>'+m[2]+'</div>').join('')+'</div>'
     +'<div class="checks"><div class="h">What the AI already did — carried into the handoff</div>'
     +d.checks.map(c=>'<div class="chk '+c[0]+'"><span class="ci">'+c[1]+'</span><span class="cx2">'+c[2]+'</span></div>').join('')+'</div>'
-    +'<div class="anno"><span class="tag">Tie · Continuity · JTBD: hand off &amp; escalate</span>Satisfaction collapses exactly at the AI→human handoff (<b>AI-off +5 vs AI-on +23 NPS</b>). When the AI hands off, the agent <b>picks up where it stopped</b>, not from zero — the most strategic pain in the dataset, hiding <i>between</i> objection categories.</div>';
+    +'<div class="anno"><span class="tag">Tie · Continuity · JTBD: hand off &amp; escalate</span>AI-first brands run <b>+23 NPS vs +5 for human-only</b> — and that lift is exactly what\'s at risk at the seam. Carry the context across, and the agent <b>picks up where the AI stopped</b>, not from zero — the most strategic pain in the dataset, hiding <i>between</i> objection categories.</div>';
 
   document.querySelectorAll('.op-role').forEach(function(e){e.textContent=d.operator;});
   renderDecision();
