@@ -534,14 +534,14 @@ function renderWork(){
     +'<div class="confmark" style="left:'+t+'%"></div></div>'
     +'<div class="confaxis"><span class="e0">0%</span><span class="tl" style="left:'+t+'%">bar · '+t+'%</span><span class="e100">100%</span></div>'
     +'<div class="confnote">'+note+'</div></div>'
-    +'<div class="anno"><span class="tag">Tie · The Shift · JTBD: route &amp; prioritize</span>The AI triaged, set priority, and routed <b>only this judgment call</b> to a human — the 47-rule routing maze becomes the AI surfacing what matters. Humans get the hard cases, not the grind.</div>';
+    +'<div class="anno"><span class="tag">Tie · The Shift · JTBD: route &amp; prioritize</span>The AI triages and prioritizes every conversation, routing the judgment calls to a human and resolving the rest — the 47-rule routing maze becomes the AI surfacing what matters.</div>';
 
   // continuity
   document.getElementById('continuity').innerHTML=
     '<div class="thread">'+d.thread.map(m=>'<div class="msg '+m[1]+'"><div class="who">'+m[0]+'</div>'+m[2]+'</div>').join('')+'</div>'
     +'<div class="checks"><div class="h">What the AI already did — carried into the handoff</div>'
     +d.checks.map(c=>'<div class="chk '+c[0]+'"><span class="ci">'+c[1]+'</span><span class="cx2">'+c[2]+'</span></div>').join('')+'</div>'
-    +'<div class="anno"><span class="tag">Tie · Continuity · JTBD: hand off &amp; escalate</span>Satisfaction collapses exactly at the AI→human handoff (<b>AI-off +5 vs AI-on +23 NPS</b>). The agent <b>starts where the AI stopped</b>, not from zero — the most strategic pain in the dataset, hiding <i>between</i> objection categories.</div>';
+    +'<div class="anno"><span class="tag">Tie · Continuity · JTBD: hand off &amp; escalate</span>Satisfaction collapses exactly at the AI→human handoff (<b>AI-off +5 vs AI-on +23 NPS</b>). When the AI hands off, the agent <b>picks up where it stopped</b>, not from zero — the most strategic pain in the dataset, hiding <i>between</i> objection categories.</div>';
 
   document.querySelectorAll('.op-role').forEach(function(e){e.textContent=d.operator;});
   renderDecision();
