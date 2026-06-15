@@ -33,6 +33,7 @@
   .pill.amber{background:var(--amber-bg);color:var(--amber)}
   .pill.green{background:var(--green-bg);color:var(--green)}
   .pill.area{background:transparent;border:1px solid var(--coral);color:var(--thesis)}
+  .pill.floorpill{background:var(--red-bg);color:var(--red)}
 
   /* top bar */
   .topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 18px;background:var(--panel);
@@ -57,7 +58,7 @@
   /* trust dial */
   .dialcard{padding:15px 18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow)}
   .dialhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-  .dialhead .lbl{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+  .dialhead .lbl{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--coral);font-weight:600;margin-bottom:8px}
   .dialhead .stagename{font-size:15px;font-weight:600}
   .dialhead .stagename b{color:var(--coral)}
   .track{position:relative;height:6px;border-radius:999px;background:var(--panel-2);margin:16px 8px 40px}
@@ -85,8 +86,8 @@
   .anno .tag{font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--thesis);font-weight:700;display:block;margin-bottom:3px}
 
   /* layout */
-  .layout{display:grid;grid-template-columns:264px 1fr;grid-template-areas:"queue esc" "log work";gap:14px;align-items:start}
-  @media(max-width:1000px){.layout{grid-template-columns:1fr;grid-template-areas:"queue" "esc" "work" "log"}}
+  .layout{display:grid;grid-template-columns:264px 1fr;gap:14px;align-items:start}
+  @media(max-width:1000px){.layout{grid-template-columns:1fr}}
   .rail{display:flex;flex-direction:column;gap:14px}
   .deccol{display:flex;flex-direction:column;gap:14px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
@@ -97,7 +98,7 @@
 
   /* queue rail */
   .queue .ch{justify-content:space-between}
-  .qitem{padding:11px 12px;border-bottom:1px solid var(--line);cursor:pointer;transition:.12s;position:relative}
+  .qitem{padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer;transition:.12s;position:relative}
   .qitem:hover{background:var(--panel-2)}
   .qitem.active{background:var(--coral-bg)}
   .qitem.active:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--coral)}
@@ -105,6 +106,10 @@
   .qitem .qm{font-size:11px;color:var(--ink-faint);margin-top:3px}
   .qarea{display:inline-block;font-size:9.5px;color:var(--thesis);border:1px solid var(--coral);border-radius:999px;padding:1px 7px;margin-top:6px}
   .qitem.resolving .qarea{color:var(--ink-faint);border-color:var(--line)}
+  .qitem.vol{cursor:default}
+  .qitem.vol:hover{background:none}
+  .qitem.vol .qn{font-weight:500;color:var(--ink-dim)}
+  .qempty{font-size:11px;color:var(--ink-faint);padding:9px 12px}
   .qitem.resolving{cursor:default;opacity:.72}
   .qitem.resolving:hover{background:none}
   .qitem.resolving .qn{color:var(--ink-dim);font-weight:500}
@@ -130,10 +135,13 @@
   .escline .ico{color:var(--amber);font-size:15px;line-height:1.3}
   .escline .t{font-size:12.3px}
   .escline .t b{color:var(--amber)}
+  .escline.ok{background:var(--green-bg);border-color:rgba(18,165,102,.32)}
+  .escline.ok .ico{color:var(--green)}
+  .escline.ok .t b{color:var(--green)}
 
   /* confidence */
-  .conf{margin-top:14px}
-  .conf .clab{font-size:11.5px;color:var(--ink-dim);margin-bottom:4px}
+  .conf{margin-top:34px}
+  .conf .clab{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--ink);font-weight:600;margin-bottom:4px}
   .confwrap{position:relative;height:8px;border-radius:999px;background:var(--panel-2);margin-top:20px}
   .conffill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--amber),var(--red));transition:width .3s ease}
   .confval{position:absolute;top:-17px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--amber);white-space:nowrap}
@@ -275,43 +283,42 @@
     </div>
     <div class="anno">
       <span class="tag">Why this is here · the mechanism</span>
-      The dial is both the <b>empathy</b> (the AI-resistant middle is real) and the <b>revenue instrument</b> — it converts hesitant merchants into deliberate adoption at their own pace instead of losing them to backlash. Autonomy is <b>earned, never forced</b>; every bet ships on it. <i>Note: some cases (fraud/abuse, compliance) sit on a permanent human floor the dial can't lift.</i>
+      The dial is both the <b>empathy</b> (the trust-gap middle is real) and the <b>revenue instrument</b> — it converts hesitant merchants into deliberate adoption at their own pace instead of losing them to backlash. Autonomy is <b>earned, never forced</b>; every bet ships on it. <i>Note: some cases (fraud/abuse, compliance) sit on a permanent human floor the dial can't lift.</i>
     </div>
   </div>
 
   <!-- LAYOUT: automated rails (queue + audit log) | human work -->
   <div class="layout">
 
+    <div class="rail">
     <!-- automated rail: queue (routes in) -->
-    <div class="card queue" style="grid-area:queue">
-      <div class="ch"><span>Escalation queue</span><span class="pill amber" id="q-count">2 need you</span></div>
+    <div class="card queue">
+      <div class="ch"><span>Escalation queue</span><span class="pill amber" id="q-count">need you</span></div>
       <div class="qsmallcap">Handed to a human</div>
-      <div id="queue-list"></div>
+      <div id="queue-human"></div>
       <div class="qsmallcap">AI is handling</div>
-      <div class="qitem resolving">
-        <div class="qn">🤖 #GR-90455 · Order status</div>
-        <div class="qm">AI resolving · no human needed</div>
-        <div class="qarea">Order status · Hands-off</div>
-      </div>
+      <div id="queue-ai"></div>
       <div class="anno" style="margin:10px">
         <span class="tag">Tie · The Shift</span>
-        Volume resolution is table stakes — the power cohort already runs >60% automation; the queue surfaces only the judgment calls. Humans get the hard cases, not the grind.
+        Raise the dial and volume moves from human to AI; humans keep only the floor (fraud / abuse), not the grind.
       </div>
     </div>
 
       <!-- completed actions / audit log — automated rail (records out) -->
-      <div class="card log" style="grid-area:log">
+      <div class="card log">
         <div class="ch"><span>Completed actions — audit log</span><span style="margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500">QA Analyst</span></div>
         <div class="cb" id="log"></div>
       </div>
+    </div>
 
+    <div class="work">
       <!-- 1. the escalation that arrived -->
-      <div class="card" style="grid-area:esc">
+      <div class="card">
         <div class="ch"><span class="num">1</span> The escalation that arrived <span class="op-role" style="margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500"></span></div>
         <div class="cb" id="cust-header"></div>
       </div>
 
-      <div class="workgrid" style="grid-area:work">
+      <div class="workgrid">
         <!-- continuity -->
         <div class="card">
           <div class="ch"><span class="num">2</span> Continuity — everything the AI knows, carried <span class="op-role" style="margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-faint);font-weight:500"></span></div>
@@ -327,6 +334,7 @@
           <div class="policy" id="policy"></div>
         </div>
       </div>
+    </div>
 
   </div>
 
@@ -343,7 +351,7 @@ const stages = [
   {name:"Auto, exceptions to you",tag:"AI acts; you step in only on flags.",                    low:"auto", money:"auto", desc:"The AI runs the work and you supervise. You're pulled in <b>only when something trips a flag</b> — you review, you don't click every action."},
   {name:"Hands-off",              tag:"AI resolves end-to-end, within your policies.",          low:"auto", money:"auto", desc:"<b>The AI resolves it end-to-end</b>, within your policies. You own the policy and the anomalies — not the individual click."}
 ];
-const thresh = [72,60,48,38,28]; // escalation threshold by stage (illustrative)
+const thresh = [96,78,62,48,30]; // auto-resolve bar by stage (illustrative); crosses below cases as trust rises
 
 /* ---------------- scenarios ---------------- */
 const DATA = {
@@ -417,6 +425,20 @@ const DATA = {
   }
 };
 const ORDER = ["maya","jordan"];
+// background volume — illustrative tickets that cross the bar at different settings
+const BG = [
+  {n:"Priya Shah",     t:"Order status",     c:93},
+  {n:"Marcus Lee",     t:"Where's my order", c:82},
+  {n:"Hana Suzuki",    t:"Sizing help",      c:70},
+  {n:"Diego Ramos",    t:"Discount code",    c:55}
+];
+function aiHandled(d){ return !d.floor && d.confidence >= thresh[stage]; }
+function stepBadge(d,risk){
+  if(d.floor) return 'lock';
+  if(aiHandled(d)) return 'auto';
+  if(risk==='money') return 'gate';      // escalated: the sensitive step always needs you
+  return stage>=2 ? 'auto' : 'gate';     // low-risk auto-applies from "Auto the routine"
+}
 
 /* ---------------- state ---------------- */
 let stage = 0;          // 0..4  (open at Stage 1)
@@ -446,44 +468,72 @@ function setStage(i){
 
 /* ---------------- queue ---------------- */
 function renderQueue(){
-  const host=document.getElementById('queue-list'); host.innerHTML='';
-  ORDER.forEach(k=>{
-    const d=DATA[k];
-    const el=document.createElement('div');
-    el.className='qitem'+(k===scen?' active':'');
-    el.onclick=()=>selectScenario(k);
-    const tp=d.tierClass!=='std'?' <span class="pill '+d.tierClass+'">'+d.qtier+'</span>':'';
-    el.innerHTML='<div class="qn">'+d.qn+tp+'</div><div class="qm">'+d.qmeta+'</div><div class="qarea">'+d.area+'</div>';
-    host.appendChild(el);
+  const human=document.getElementById('queue-human'); human.innerHTML='';
+  const ai=document.getElementById('queue-ai'); ai.innerHTML='';
+  const bar=thresh[stage];
+  let needYou=0;
+  // showcase cases (clickable) first, then background volume (display-only)
+  const list=ORDER.map(k=>({show:true,key:k,name:DATA[k].qn,meta:DATA[k].qmeta,conf:DATA[k].confidence,floor:DATA[k].floor,tierClass:DATA[k].tierClass,qtier:DATA[k].qtier,area:DATA[k].area}))
+    .concat(BG.map(b=>({show:false,name:b.n,meta:b.t,conf:b.c,floor:false})));
+  list.forEach(c=>{
+    const handled = !c.floor && c.conf>=bar;
+    if(handled){
+      const el=document.createElement('div'); el.className='qitem resolving';
+      const tag=c.show&&c.tierClass!=='std'?' <span class="pill '+c.tierClass+'">'+c.qtier+'</span>':'';
+      el.innerHTML='<div class="qn">🤖 '+c.name+tag+'</div><div class="qm">'+c.meta+' · AI resolving</div>';
+      ai.appendChild(el);
+    } else {
+      needYou++;
+      const el=document.createElement('div');
+      if(c.show){
+        el.className='qitem'+(c.key===scen?' active':''); el.onclick=()=>selectScenario(c.key);
+        const tp=c.tierClass!=='std'?' <span class="pill '+c.tierClass+'">'+c.qtier+'</span>':'';
+        const fl=c.floor?' <span class="pill floorpill">🔒 floor</span>':'';
+        el.innerHTML='<div class="qn">'+c.name+tp+fl+'</div><div class="qm">'+c.meta+'</div><div class="qarea">'+c.area+'</div>';
+      } else {
+        el.className='qitem vol';
+        el.innerHTML='<div class="qn">'+c.name+'</div><div class="qm">'+c.meta+'</div>';
+      }
+      human.appendChild(el);
+    }
   });
+  if(!ai.children.length) ai.innerHTML='<div class="qempty">Nothing yet — raise the dial.</div>';
+  document.getElementById('q-count').textContent=needYou+' need you';
 }
-function selectScenario(k){ scen=k; decided=null; editing=false; ovrSel=null; renderQueue(); renderWork(); }
-
-/* ---------------- gating ---------------- */
-function stepState(risk){
-  const d=DATA[scen];
-  if(d.floor) return 'gate';                 // permanent human floor
-  return stages[stage][risk];                // 'gate' | 'auto'
-}
+function selectScenario(k){ scen=k; decided=null; editing=false; ovrSel=null; renderWork(); }
 
 /* ---------------- render work ---------------- */
 function renderWork(){
+  renderQueue();
   const d=DATA[scen];
   // header
   const conf=d.confidence, t=thresh[stage];
+  const handled=aiHandled(d);
+  const route = d.floor ? 'escalated' : (handled ? 'AI-resolved' : 'escalated');
+  const escCls = handled ? ' ok' : '';
+  const escIco = handled ? '✓' : '⤴';
+  const escText = handled ? '<b>AI resolved this within policy</b> — no human needed at this trust setting.' : d.escal;
+  let note;
+  if(d.floor){
+    note='Read: this case is on the permanent <b>human floor</b> (fraud / abuse pattern). It stays with a person at <b>every</b> setting, regardless of confidence or where the bar sits.';
+  } else if(handled){
+    note='Read: the AI\'s self-estimated chance of resolving this on its own. At this setting <b>'+conf+'% clears your auto-resolve bar for refunds ('+t+'%)</b>, so the AI resolves it end-to-end. Drag the dial down and the bar rises above it — then it escalates to you.';
+  } else {
+    note='Read: the AI\'s self-estimated chance of resolving this on its own (policy-match · intent clarity · action risk · similar past cases). It escalated because <b>'+conf+'% sits below your auto-resolve bar for refunds ('+t+'%)</b> at this setting. The bar <b>is</b> the setting — drag the dial to preview where it sits.';
+  }
   const tierPill = d.tierClass!=='std' ? ' <span class="pill '+d.tierClass+'">'+d.tier+'</span>' : '';
   document.getElementById('cust-header').innerHTML=
     '<div class="crow"><div class="avatar" style="background:'+d.avatar+'">'+d.initials+'</div>'
     +'<div style="flex:1"><div class="nm">'+d.name+tierPill+' <span class="pill '+d.priorityClass+'">'+d.priority+'</span> <span class="pill area">'+d.area+'</span></div>'
-    +'<div class="em">'+d.email+' · '+d.channel+' → escalated</div></div></div>'
-    +'<div class="escline"><span class="ico">⤴</span><span class="t">'+d.escal+'</span></div>'
+    +'<div class="em">'+d.email+' · '+d.channel+' → '+route+'</div></div></div>'
+    +'<div class="escline'+escCls+'"><span class="ico">'+escIco+'</span><span class="t">'+escText+'</span></div>'
     +'<div class="kvs">'+d.kvs.map(k=>'<div class="kv"><div class="k">'+k[0]+'</div><div class="v">'+k[1]+'</div></div>').join('')+'</div>'
-    +'<div class="conf"><div class="clab"><span>AI confidence it can resolve this alone</span></div>'
+    +'<div class="conf"><div class="clab"><span>AI confidence · this case</span><span style="color:var(--ink-faint);font-weight:500">Auto-resolve bar · this setting</span></div>'
     +'<div class="confwrap"><div class="conffill" style="width:'+conf+'%"></div>'
     +'<div class="confval" style="left:'+conf+'%">'+conf+'%</div>'
     +'<div class="confmark" style="left:'+t+'%"></div></div>'
-    +'<div class="confaxis"><span class="e0">0%</span><span class="tl" style="left:'+t+'%">auto-resolve · '+t+'%</span><span class="e100">100%</span></div>'
-    +'<div class="confnote">Read: the AI\'s self-estimated chance of resolving this correctly on its own (policy-match · intent clarity · action risk · similar past cases). It escalated because <b>'+conf+'% sits below your auto-resolve bar for refunds ('+t+'%)</b> at the current trust setting. The bar <b>is</b> the setting — drag the dial to preview where it sits at each one.</div></div>'
+    +'<div class="confaxis"><span class="e0">0%</span><span class="tl" style="left:'+t+'%">bar · '+t+'%</span><span class="e100">100%</span></div>'
+    +'<div class="confnote">'+note+'</div></div>'
     +'<div class="anno"><span class="tag">Tie · The Shift · JTBD: route &amp; prioritize</span>The AI triaged, set priority, and routed <b>only this judgment call</b> to a human — the 47-rule routing maze becomes the AI surfacing what matters. Humans get the hard cases, not the grind.</div>';
 
   // continuity
@@ -491,7 +541,7 @@ function renderWork(){
     '<div class="thread">'+d.thread.map(m=>'<div class="msg '+m[1]+'"><div class="who">'+m[0]+'</div>'+m[2]+'</div>').join('')+'</div>'
     +'<div class="checks"><div class="h">What the AI already did — carried into the handoff</div>'
     +d.checks.map(c=>'<div class="chk '+c[0]+'"><span class="ci">'+c[1]+'</span><span class="cx2">'+c[2]+'</span></div>').join('')+'</div>'
-    +'<div class="anno"><span class="tag">Tie · Bet 1 · JTBD: hand off &amp; escalate</span>Satisfaction collapses exactly at the AI→human handoff (<b>AI-off +5 vs AI-on +23 NPS</b>). The agent <b>starts where the AI stopped</b>, not from zero — the most strategic pain in the dataset, hiding <i>between</i> objection categories.</div>';
+    +'<div class="anno"><span class="tag">Tie · Continuity · JTBD: hand off &amp; escalate</span>Satisfaction collapses exactly at the AI→human handoff (<b>AI-off +5 vs AI-on +23 NPS</b>). The agent <b>starts where the AI stopped</b>, not from zero — the most strategic pain in the dataset, hiding <i>between</i> objection categories.</div>';
 
   document.querySelectorAll('.op-role').forEach(function(e){e.textContent=d.operator;});
   renderDecision();
@@ -504,13 +554,12 @@ function renderWork(){
 /* ---------------- decision ---------------- */
 function renderDecision(){
   const d=DATA[scen], host=document.getElementById('decision');
-  const states=d.steps.map(s=>stepState(s.risk));
-  const anyGated=states.includes('gate');
+  const states=d.steps.map(s=>stepBadge(d,s.risk));
 
-  // all auto + already nothing to decide
-  if(!anyGated && !decided){
+  // AI handles it on its own (confidence clears the bar) — nothing pending
+  if(aiHandled(d) && !decided){
     host.innerHTML='<div class="gatebadge auto">✓ Auto-applied within policy</div>'
-      +'<div class="allclear">All clear — nothing pending<div class="sub">At Stage '+(stage+1)+', the AI applied these on its own. See the audit log below.</div></div>'
+      +'<div class="allclear">All clear — AI resolved this<div class="sub">At '+stages[stage].name+', '+d.confidence+'% clears the bar, so the AI handled it end-to-end. See the audit log below.</div></div>'
       +annoBet2();
     return;
   }
@@ -555,7 +604,7 @@ function autoNote(states){
   return 'At Stage '+(stage+1)+', every step is gated — the AI can\'t send without you.';
 }
 function annoBet2(){
-  return '<div class="anno"><span class="tag">Tie · Bet 2 · JTBD: teach the system</span>This is the <b>approve-don\'t-author</b> primitive: the AI proposes from observed patterns; the human approves in context. Each decision trains the policy engine that retires 47 hand-built rules — AI adopters run <b>1.8× more config</b> today, not less. <b>The dial decides whether a step is gated or auto-applied.</b></div>';
+  return '<div class="anno"><span class="tag">Tie · approve-don\'t-author · JTBD: teach the system</span>This is the <b>approve-don\'t-author</b> primitive: the AI proposes from observed patterns; the human approves in context. Each decision trains the policy engine that retires 47 hand-built rules — AI adopters run <b>1.8× more config</b> today, not less. <b>The dial decides whether a step is gated or auto-applied.</b></div>';
 }
 function overridePanel(d){
   return '<div class="ovr" id="ovr"><div class="oh">Override — take manual control. What did you do instead?</div>'
@@ -575,7 +624,7 @@ function approve(){ decided='approved'; renderDecision(); renderLog(); showPolic
 /* ---------------- completed actions log ---------------- */
 function renderLog(){
   const d=DATA[scen], host=document.getElementById('log');
-  const states=d.steps.map(s=>stepState(s.risk));
+  const states=d.steps.map(s=>stepBadge(d,s.risk));
   let entries=[];
   // 1) AI investigation always logged
   entries.push(['ai','AI','<b>Investigated & verified context</b> — '+d.checks.length+' checks carried into the handoff','Audit · '+d.name]);
@@ -583,7 +632,7 @@ function renderLog(){
   d.steps.forEach((s,i)=>{ if(states[i]==='auto' && !decided) entries.push(['auto','✓','<b>AI auto-applied:</b> '+s.t,'Within policy · Stage '+(stage+1)]); });
   // 3) decision
   if(decided==='approved'){
-    d.steps.forEach(s=> entries.push(['human','✓','<b>Agent approved:</b> '+s.t,'Logged to audit · feeds telemetry (Bet 3)']));
+    d.steps.forEach(s=> entries.push(['human','✓','<b>Agent approved:</b> '+s.t,'Logged to audit · feeds telemetry']));
   } else if(decided==='overridden'){
     const labels=['Declined the request (denied refund)','Escalated to a manager','Custom resolution recorded'];
     entries.push(['override','⤺','<b>Agent overrode AI</b> → '+(labels[ovrSel]||labels[0]),'Recommendation vs. choice delta → drift signal']);
@@ -591,7 +640,7 @@ function renderLog(){
   host.innerHTML = (entries.length
     ? entries.map(e=>'<div class="logentry '+e[0]+'"><span class="li">'+e[1]+'</span><span><span class="lt">'+e[2]+'</span><div class="lm">'+e[3]+'</div></span></div>').join('')
     : '<div class="logempty">Nothing yet.</div>')
-    +'<div class="anno"><span class="tag">Tie · Bet 3 · JTBD: trust &amp; verify</span>Every decision — the AI\'s and the human\'s — is logged here. This is the instrument panel QA reviews to verify quality and catch drift.</div>';
+    +'<div class="anno"><span class="tag">Tie · audit &amp; telemetry · JTBD: trust &amp; verify</span>Every decision — the AI\'s and the human\'s — is logged here. This is the instrument panel QA reviews to verify quality and catch drift.</div>';
 }
 
 /* ---------------- policy card ---------------- */
@@ -605,7 +654,7 @@ function showPolicy(kind){
     +'<div class="gov"><span class="gi">②</span><span>Checked against the existing <b>policy context graph</b> for conflicts/overlap → <span class="conflict">'+d.conflict+'</span><span class="pendingbadge">pending review</span></span></div>'
     +'<div class="btnrow"><button class="btn primary" onclick="toast(\'Sent to simulation &amp; replay (descoped in this prototype)\')">Send to simulation</button>'
     +'<button class="btn ghost" onclick="document.getElementById(\'policy\').classList.remove(\'show\')">Not now</button></div>'
-    +'<div class="anno"><span class="tag">Tie · Bet 2 governance</span>One judgment becomes a candidate rule — but never live until it <b>passes simulation &amp; replay</b> and reconciles with the existing policy graph. Authoring is killed; <b>approval-in-simulation</b> replaces it.</div>';
+    +'<div class="anno"><span class="tag">Tie · policy governance</span>One judgment becomes a candidate rule — but never live until it <b>passes simulation &amp; replay</b> and reconciles with the existing policy graph. Authoring is killed; <b>approval-in-simulation</b> replaces it.</div>';
   host.classList.add('show');
 }
 
@@ -619,7 +668,7 @@ function toggleThesis(){ document.body.classList.toggle('show-thesis'); document
 /* ---------------- how to read ---------------- */
 function renderHowTo(){
   document.getElementById('howto').innerHTML=
-    '<b>How to read this</b> — illustrative data. One working surface for the AI→human <b>seam</b>. The <b>queue</b> (left) shows only what needs judgment; the AI absorbs the rest. Pick <b>Maya</b> (VIP, clean) vs <b>Jordan</b> (abuse-flag, on the permanent human <b>floor</b>) to see the same surface reach opposite, data-driven calls. Move the <b>trust dial</b> to watch steps shift from <i>needs-you</i> to <i>auto-applied</i> — autonomy earned, never forced. The flow: <b>① Escalation → ② Continuity (Bet 1) → ③ Decision (Bet 2, approve-don\'t-author) → ④ Audit log (Bet 3)</b>; approving or overriding can <b>propose a policy</b> that must pass <b>simulation &amp; replay</b> + a <b>conflict check</b> before going live. Turn on <b>Thesis layer</b> (top-right) to see each element\'s tie to a bet, a job-to-be-done, and the evidence. &nbsp;·&nbsp; Thesis: <b>the Helpdesk\'s job is flipping from throughput to judgment.</b>';
+    '<b>How to read this:</b> illustrative data. One surface where the model inverts: AI operates, the human judges, and the merchant commands it and trains the policy engine behind it. Pick <b>Maya</b> (VIP, clean) or <b>Jordan</b> (abuse-flag, human floor) to see opposite calls from one surface; move the trust dial to watch actions shift from needs-you to auto-applied. Toggle Thesis layer (top-right) for the strategy ties. <b>The Helpdesk\'s job is flipping from throughput to judgment.</b>';
 }
 
 /* ---------------- init ---------------- */
